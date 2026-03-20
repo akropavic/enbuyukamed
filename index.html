@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CioTV Canlı</title>
+    <title>CioTV</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
 
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --accent-color: #10b981; /* Neon Yeşil */
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-dark: #09090b;
+            --bg-card: #18181b;
+            --primary: #10b981; /* Neon Yeşil */
+            --text-main: #fafafa;
+            --text-dim: #a1a1aa;
             
+            /* Safe Area Değişkenleri */
             --sat: env(safe-area-inset-top, 0px);
             --sab: env(safe-area-inset-bottom, 0px);
             --sal: env(safe-area-inset-left, 0px);
@@ -27,320 +27,296 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent; 
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--bg-dark);
             color: var(--text-main);
-            min-height: 100vh;
+            /* Sağa sola kaymayı kesinlikle engeller */
+            overflow-x: hidden; 
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
-            
-            padding-top: var(--sat);
-            padding-bottom: var(--sab);
-            padding-left: var(--sal);
-            padding-right: var(--sar);
+            min-height: 100vh;
         }
 
+        /* HEADER - Safe area uyumlu */
         header {
-            padding: 16px 20px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
+            padding: calc(var(--sat) + 16px) 20px 16px 20px;
+            background: var(--bg-dark);
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
-            top: var(--sat);
-            z-index: 10;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            top: 0;
+            z-index: 50;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        header h1 {
-            font-size: 20px;
-            font-weight: 800;
-            text-transform: uppercase;
-            background: linear-gradient(to right, #10b981, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .brand {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .brand span {
+            color: var(--primary);
         }
 
         .live-badge {
             background-color: #ef4444;
             color: white;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 20px;
-            letter-spacing: 1px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
-        main {
-            display: flex; 
-            flex-direction: row;
-            gap: 24px;
-            padding: 20px;
+        /* VİDEO ALANI */
+        .video-container {
             width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            flex-grow: 1;
-        }
-
-        .player-section {
-            flex: 1;
-            min-width: 0; 
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .video-wrapper {
             background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
+            /* Ekranın sağından solundan taşmaması için safe area */
+            padding-left: var(--sal);
+            padding-right: var(--sar);
         }
 
-        /* Video.js Özel Tasarım Dokunuşları (Temamıza uygun) */
         .video-js {
-            border-radius: 12px;
-            overflow: hidden;
+            width: 100%;
         }
+
         .vjs-default-skin .vjs-play-progress,
         .vjs-default-skin .vjs-volume-level {
-            background-color: var(--accent-color) !important;
-        }
-        .vjs-default-skin .vjs-big-play-button {
-            background-color: rgba(16, 185, 129, 0.8) !important;
-            border: none !important;
-            border-radius: 50% !important;
-            width: 80px !important;
-            height: 80px !important;
-            line-height: 80px !important;
-            margin-left: -40px !important;
-            margin-top: -40px !important;
+            background-color: var(--primary) !important;
         }
 
-        .now-playing {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-main);
-            padding: 0 4px;
+        /* BİLGİ ÇUBUĞU (Videonun hemen altı) */
+        .info-bar {
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-left: calc(var(--sal) + 20px);
+            padding-right: calc(var(--sar) + 20px);
         }
 
-        .channels-section {
-            width: 320px;
-            flex-shrink: 0; 
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .channels-section h3 {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
+        .now-playing-label {
+            font-size: 12px;
+            color: var(--text-dim);
             text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        #nowPlayingText {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* KANAL LİSTESİ */
+        .channels-wrapper {
+            flex: 1;
+            padding: 16px 20px;
+            padding-bottom: calc(var(--sab) + 20px); /* Alttaki iPhone çubuğu için boşluk */
+            padding-left: calc(var(--sal) + 20px);
+            padding-right: calc(var(--sar) + 20px);
+        }
+
+        .channels-wrapper h3 {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .channel-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 10px; /* Kanallar arası boşluk */
         }
 
         .channel-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid transparent;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
             color: var(--text-main);
-            padding: 14px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: left;
+            padding: 16px;
+            border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
-            transition: all 0.2s ease;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .channel-btn:active {
-            transform: scale(0.98); 
+            transform: scale(0.97);
+            background: rgba(255,255,255,0.1);
         }
 
         .channel-btn.active {
-            background: rgba(16, 185, 129, 0.15);
-            border-color: var(--accent-color);
-            color: var(--accent-color);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--text-main);
         }
 
-        .channel-btn.active::after {
-            content: '';
+        .channel-btn.active .status-dot {
             width: 8px;
             height: 8px;
-            background-color: var(--accent-color);
+            background-color: var(--primary);
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-color);
+            box-shadow: 0 0 10px var(--primary);
         }
 
-      /* MOBİL RESPONSIVE DÜZENLEME (Daraltılmış Boşluklar) */
-        @media (max-width: 900px) {
-            main {
-                flex-direction: column; 
-                padding: 12px;
-                gap: 12px; /* Oynatıcı ile alt bölüm arasındaki genel boşluk azaltıldı */
+        /* PC İÇİN UFAK BİR DOKUNUŞ (Geniş ekranlarda çok yayılmasın diye) */
+        @media (min-width: 768px) {
+            body {
+                align-items: center;
+                background-color: #000;
             }
-
-            .player-section {
-                gap: 8px; /* Video ile altındaki yazı arası iyice daraldı */
-            }
-
-            .channels-section {
-                width: 100%; 
-                padding: 0 4px; /* Sağdan soldan sıfıra yakın boşluk */
-                background: transparent;
-                border: none;
-            }
-
-            .channels-section h3 {
-                margin-bottom: 8px; /* Başlık ile kanallar arasındaki o büyük boşluk kapandı */
-                font-size: 13px; /* Mobilde sırıtmasın diye başlık bir tık küçüldü */
-            }
-
-            .channel-list {
-                display: grid;
-                /* Butonlar ekrana daha iyi sığsın diye genişlikleri ufaltıldı */
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 8px; /* Butonların kendi aralarındaki boşluk da daraldı */
-            }
-
-            .channel-btn {
-                text-align: center;
-                justify-content: center;
-                padding: 10px; /* Butonların iç boşluğu kısıldı */
-                font-size: 14px; /* Mobilde çok kaba durmaması için font ufaltıldı */
-            }
-
-            .channel-btn.active::after {
-                display: none; 
+            .app-container {
+                width: 100%;
+                max-width: 480px; /* Mobil ekran boyutuna sabitliyoruz */
+                background-color: var(--bg-dark);
+                min-height: 100vh;
+                box-shadow: 0 0 50px rgba(0,0,0,0.5);
             }
         }
     </style>
 </head>
 <body>
 
+<div class="app-container">
     <header>
-        <h1>CioTV</h1>
-        <span class="live-badge">CANLI</span>
+        <div class="brand">Cio<span>TV</span></div>
+        <div class="live-badge">CANLI</div>
     </header>
 
     <main>
-        <div class="player-section">
-            <div class="video-wrapper">
-                <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered vjs-fluid" controls preload="auto" autoplay muted playsinline>
-                    <p class="vjs-no-js">
-                        Bu videoyu izlemek için JavaScript'i etkinleştirin ve HTML5 destekleyen bir tarayıcı kullanın.
-                    </p>
-                </video>
-            </div>
-            <div class="now-playing" id="nowPlayingText">Yükleniyor...</div>
+        <div class="video-container">
+            <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered vjs-fluid" controls preload="auto" autoplay muted playsinline>
+            </video>
         </div>
 
-        <div class="channels-section">
-            <h3>Kanal Listesi</h3>
+        <div class="info-bar">
+            <div class="now-playing-label">Şu An Yayında</div>
+            <div id="nowPlayingText">Yükleniyor...</div>
+        </div>
+
+        <div class="channels-wrapper">
+            <h3>KANALLAR</h3>
             <div class="channel-list" id="channelList">
                 </div>
         </div>
     </main>
+</div>
 
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
-    <script>
-        const jsonUrl = "https://raw.githubusercontent.com/akropavic/kacakci/main/stream_links.json";
-        const channelList = document.getElementById('channelList');
-        const nowPlayingText = document.getElementById('nowPlayingText');
-        
-        // Video.js Oynatıcıyı Başlat (HTML içindeki id'ye bağlanıyoruz)
-        const player = videojs('my-video', {
-            liveui: true, // Canlı yayın UI kontrollerini aktif et
-            autoplay: 'muted',
-            controls: true
-        });
+<script>
+    const jsonUrl = "https://raw.githubusercontent.com/akropavic/kacakci/main/stream_links.json";
+    const channelList = document.getElementById('channelList');
+    const nowPlayingText = document.getElementById('nowPlayingText');
+    
+    // Video.js Oynatıcıyı Başlat
+    const player = videojs('my-video', {
+        liveui: true,
+        autoplay: 'muted',
+        controls: true
+    });
 
-        function formatChannelName(name) {
-            return name.replace('bein', 'BeIN Sports ')
-                       .replace('max', 'Max ')
-                       .toUpperCase();
-        }
+    // Kanal ismini temiz gösterme
+    function formatChannelName(name) {
+        return name.replace('bein', 'BeIN Sports ')
+                   .replace('max', 'Max ')
+                   .toUpperCase();
+    }
 
-        fetch(jsonUrl)
-            .then(response => response.json())
-            .then(data => {
-                let isFirstChannel = true;
+    // Veri çekme mantığı
+    fetch(jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+            let isFirstChannel = true;
 
-                for (const [channelKey, links] of Object.entries(data)) {
-                    if (links.length > 0) {
-                        const streamUrl = links[0];
-                        const displayName = formatChannelName(channelKey);
+            for (const [channelKey, links] of Object.entries(data)) {
+                if (links.length > 0) {
+                    const streamUrl = links[0];
+                    const displayName = formatChannelName(channelKey);
+                    
+                    const btn = document.createElement('div');
+                    btn.className = 'channel-btn';
+                    
+                    // İçine isim ve aktiflik noktası koyuyoruz
+                    btn.innerHTML = `
+                        <span>${displayName}</span>
+                        <div class="status-dot"></div>
+                    `;
+                    
+                    btn.onclick = () => {
+                        // Diğer butonlardan active class'ını temizle
+                        document.querySelectorAll('.channel-btn').forEach(b => {
+                            b.classList.remove('active');
+                            b.querySelector('.status-dot').style.display = 'none';
+                        });
                         
-                        const btn = document.createElement('button');
-                        btn.className = 'channel-btn';
-                        btn.innerText = displayName;
+                        // Tıklananı aktif yap
+                        btn.classList.add('active');
+                        btn.querySelector('.status-dot').style.display = 'block';
                         
-                        btn.onclick = () => {
-                            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                            nowPlayingText.innerText = displayName;
-                            
-                            playStream(streamUrl);
-                            
-                            if(window.innerWidth <= 900) {
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }
-                        };
+                        nowPlayingText.innerText = displayName;
+                        playStream(streamUrl);
+                        
+                        // Tıklayınca yukarı kaydır
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
 
-                        channelList.appendChild(btn);
+                    // Başlangıçta noktaları gizle
+                    btn.querySelector('.status-dot').style.display = 'none';
+                    
+                    channelList.appendChild(btn);
 
-                        // İlk kanalı otomatik aç
-                        if (isFirstChannel) {
-                            btn.classList.add('active');
-                            nowPlayingText.innerText = displayName;
-                            playStream(streamUrl);
-                            isFirstChannel = false;
-                        }
+                    // İlk kanalı aç
+                    if (isFirstChannel) {
+                        btn.classList.add('active');
+                        btn.querySelector('.status-dot').style.display = 'block';
+                        nowPlayingText.innerText = displayName;
+                        playStream(streamUrl);
+                        isFirstChannel = false;
                     }
                 }
-            })
-            .catch(error => {
-                console.error("Veri hatası:", error);
-                nowPlayingText.innerText = "Yayın bulunamadı!";
-            });
+            }
+        })
+        .catch(error => {
+            console.error("Veri hatası:", error);
+            nowPlayingText.innerText = "Yayın listesi çekilemedi!";
+            nowPlayingText.style.color = "#ef4444";
+        });
 
-        function playStream(url) {
-            // Video.js API'si ile kaynağı değiştir ve oynat
-            player.src({
-                src: url,
-                type: 'application/x-mpegURL' // HLS formatı
-            });
-            
-            player.ready(function() {
-                player.play().catch(e => console.log("Otomatik oynatma bekliyor..."));
-            });
-        }
-    </script>
+    function playStream(url) {
+        player.src({
+            src: url,
+            type: 'application/x-mpegURL'
+        });
+        
+        player.ready(function() {
+            player.play().catch(e => console.log("Otomatik oynatma bekliyor..."));
+        });
+    }
+</script>
+
 </body>
 </html>
