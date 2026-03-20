@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CioTV Canlı</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #10b981; /* Neon Yeşil */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+            --sal: env(safe-area-inset-left, 0px);
+            --sar: env(safe-area-inset-right, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            
+            padding-top: var(--sat);
+            padding-bottom: var(--sab);
+            padding-left: var(--sal);
+            padding-right: var(--sar);
+        }
+
+        header {
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: var(--sat);
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .live-badge {
+            background-color: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        main {
+            display: flex; 
+            flex-direction: row;
+            gap: 24px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-grow: 1;
+        }
+
+        .player-section {
+            flex: 1;
+            min-width: 0; 
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .video-wrapper {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Video.js Özel Tasarım Dokunuşları (Temamıza uygun) */
+        .video-js {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .vjs-default-skin .vjs-play-progress,
+        .vjs-default-skin .vjs-volume-level {
+            background-color: var(--accent-color) !important;
+        }
+        .vjs-default-skin .vjs-big-play-button {
+            background-color: rgba(16, 185, 129, 0.8) !important;
+            border: none !important;
+            border-radius: 50% !important;
+            width: 80px !important;
+            height: 80px !important;
+            line-height: 80px !important;
+            margin-left: -40px !important;
+            margin-top: -40px !important;
+        }
+
+        .now-playing {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding: 0 4px;
+        }
+
+        .channels-section {
+            width: 320px;
+            flex-shrink: 0; 
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .channels-section h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .channel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .channel-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 14px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .channel-btn:active {
+            transform: scale(0.98); 
+        }
+
+        .channel-btn.active {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .channel-btn.active::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-color);
+        }
+
+        @media (max-width: 900px) {
+            main {
+                flex-direction: column; 
+                padding: 12px;
+                gap: 16px;
+            }
+
+            .channels-section {
+                width: 100%; 
+                padding: 12px;
+                background: transparent;
+                border: none;
+            }
+
+            .channel-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+            }
+
+            .channel-btn {
+                text-align: center;
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .channel-btn.active::after {
+                display: none; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CioTV</h1>
+        <span class="live-badge">CANLI</span>
+    </header>
+
+    <main>
+        <div class="player-section">
+            <div class="video-wrapper">
+                <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered vjs-fluid" controls preload="auto" autoplay muted playsinline>
+                    <p class="vjs-no-js">
+                        Bu videoyu izlemek için JavaScript'i etkinleştirin ve HTML5 destekleyen bir tarayıcı kullanın.
+                    </p>
+                </video>
+            </div>
+            <div class="now-playing" id="nowPlayingText">Yükleniyor...</div>
+        </div>
+
+        <div class="channels-section">
+            <h3>Kanal Listesi</h3>
+            <div class="channel-list" id="channelList">
+                </div>
+        </div>
+    </main>
+
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+
+    <script>
+        const jsonUrl = "https://raw.githubusercontent.com/akropavic/kacakci/main/stream_links.json";
+        const channelList = document.getElementById('channelList');
+        const nowPlayingText = document.getElementById('nowPlayingText');
+        
+        // Video.js Oynatıcıyı Başlat (HTML içindeki id'ye bağlanıyoruz)
+        const player = videojs('my-video', {
+            liveui: true, // Canlı yayın UI kontrollerini aktif et
+            autoplay: 'muted',
+            controls: true
+        });
+
+        function formatChannelName(name) {
+            return name.replace('bein', 'BeIN Sports ')
+                       .replace('max', 'Max ')
+                       .toUpperCase();
+        }
+
+        fetch(jsonUrl)
+            .then(response => response.json())
+            .then(data => {
+                let isFirstChannel = true;
+
+                for (const [channelKey, links] of Object.entries(data)) {
+                    if (links.length > 0) {
+                        const streamUrl = links[0];
+                        const displayName = formatChannelName(channelKey);
+                        
+                        const btn = document.createElement('button');
+                        btn.className = 'channel-btn';
+                        btn.innerText = displayName;
+                        
+                        btn.onclick = () => {
+                            document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            nowPlayingText.innerText = displayName;
+                            
+                            playStream(streamUrl);
+                            
+                            if(window.innerWidth <= 900) {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        };
+
+                        channelList.appendChild(btn);
+
+                        // İlk kanalı otomatik aç
+                        if (isFirstChannel) {
+                            btn.classList.add('active');
+                            nowPlayingText.innerText = displayName;
+                            playStream(streamUrl);
+                            isFirstChannel = false;
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Veri hatası:", error);
+                nowPlayingText.innerText = "Yayın bulunamadı!";
+            });
+
+        function playStream(url) {
+            // Video.js API'si ile kaynağı değiştir ve oynat
+            player.src({
+                src: url,
+                type: 'application/x-mpegURL' // HLS formatı
+            });
+            
+            player.ready(function() {
+                player.play().catch(e => console.log("Otomatik oynatma bekliyor..."));
+            });
+        }
+    </script>
+</body>
+</html>
