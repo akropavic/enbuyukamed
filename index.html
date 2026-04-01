@@ -2,320 +2,1209 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CioTV</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a10">
+    <title>CioTV — Canlı Yayın</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
+        /* =====================================================
+           ROOT — DESIGN TOKENS
+           ===================================================== */
         :root {
-            --bg-dark: #09090b;
-            --bg-card: #18181b;
-            --primary: #10b981; /* Neon Yeşil */
-            --text-main: #fafafa;
-            --text-dim: #a1a1aa;
-            
-            /* Safe Area Değişkenleri */
-            --sat: env(safe-area-inset-top, 0px);
+            --bg-void:    #0a0a10;
+            --bg-panel:   #0f0f18;
+            --bg-card:    #16161f;
+            --bg-hover:   #1e1e2a;
+            --bg-active:  rgba(16, 185, 129, 0.08);
+
+            --green:      #10b981;
+            --green-dim:  rgba(16, 185, 129, 0.25);
+            --green-glow: rgba(16, 185, 129, 0.15);
+
+            --red:        #ef4444;
+            --red-dim:    rgba(239, 68, 68, 0.15);
+
+            --t1: #f4f4f6;
+            --t2: #8c8ca0;
+            --t3: #4a4a5a;
+
+            --border:     rgba(255,255,255,0.06);
+            --border-act: rgba(16,185,129,0.35);
+
+            --radius-sm:  8px;
+            --radius-md:  12px;
+            --radius-lg:  18px;
+
+            /* Safe area */
+            --sat: env(safe-area-inset-top,    0px);
             --sab: env(safe-area-inset-bottom, 0px);
-            --sal: env(safe-area-inset-left, 0px);
-            --sar: env(safe-area-inset-right, 0px);
+            --sal: env(safe-area-inset-left,   0px);
+            --sar: env(safe-area-inset-right,  0px);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
+        /* =====================================================
+           RESET & BASE
+           ===================================================== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            background: var(--bg-void);
+            color: var(--t1);
+            font-family: 'DM Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            /* Sağa sola kaymayı kesinlikle engeller */
-            overflow-x: hidden; 
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--t3); border-radius: 4px; }
+
+        button { cursor: pointer; border: none; background: none; color: inherit; font-family: inherit; }
+        a { color: inherit; text-decoration: none; }
+
+        /* =====================================================
+           APP SHELL
+           ===================================================== */
+        #app {
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            height: 100%;
+            height: 100dvh; /* dynamic viewport height */
+            padding-top:    var(--sat);
+            padding-bottom: var(--sab);
+            padding-left:   var(--sal);
+            padding-right:  var(--sar);
         }
 
-        /* HEADER - Safe area uyumlu */
+        /* =====================================================
+           HEADER
+           ===================================================== */
         header {
-            padding: calc(var(--sat) + 16px) 20px 16px 20px;
-            background: var(--bg-dark);
+            height: 60px;
+            min-height: 60px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
-            top: 0;
+            padding: 0 24px;
             z-index: 50;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
         }
 
-        .brand {
-            font-size: 22px;
+        .logo {
+            font-family: 'Exo 2', sans-serif;
             font-weight: 900;
-            letter-spacing: -1px;
-            color: var(--text-main);
+            font-size: 22px;
+            letter-spacing: -0.5px;
+            color: var(--t1);
             display: flex;
             align-items: center;
+            gap: 8px;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--green);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-icon svg { fill: #fff; width: 18px; height: 18px; }
+        .logo em { color: var(--green); font-style: normal; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: var(--red-dim);
+            border: 1px solid rgba(239,68,68,0.25);
+        }
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 8px var(--red);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.5; transform:scale(0.85); }
+        }
+        .live-badge span {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--red);
+            text-transform: uppercase;
+        }
+
+        .channel-count {
+            font-size: 12px;
+            color: var(--t2);
+            font-weight: 500;
+        }
+
+        /* =====================================================
+           BODY LAYOUT
+           ===================================================== */
+        .body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* =====================================================
+           SIDEBAR
+           ===================================================== */
+        .sidebar {
+            width: 300px;
+            min-width: 300px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-top {
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--t3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Search */
+        .search-wrap {
+            margin-top: 10px;
+            position: relative;
+        }
+        .search-wrap svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            fill: var(--t3);
+            width: 15px;
+            height: 15px;
+            pointer-events: none;
+        }
+        #searchInput {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--t1);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            padding: 8px 12px 8px 32px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #searchInput::placeholder { color: var(--t3); }
+        #searchInput:focus { border-color: var(--green-dim); }
+
+        /* Channel List */
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
             gap: 4px;
         }
 
-        .brand span {
-            color: var(--primary);
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.15s;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
+        .channel-item:hover {
+            background: var(--bg-hover);
+            transform: translateX(3px);
+        }
+        .channel-item.active {
+            background: var(--bg-active);
+            border-color: var(--border-act);
+        }
+        .channel-item.active:hover { transform: none; }
 
-        .live-badge {
-            background-color: #ef4444;
-            color: white;
+        .ch-num {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--t3);
+            min-width: 22px;
+            text-align: right;
+            font-family: 'Exo 2', sans-serif;
+        }
+        .channel-item.active .ch-num { color: var(--green); }
+
+        .ch-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-family: 'Exo 2', sans-serif;
             font-size: 10px;
             font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 4px;
+            color: var(--green);
             letter-spacing: 0.5px;
-            animation: pulse 2s infinite;
+            overflow: hidden;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        /* VİDEO ALANI */
-        .video-container {
-            width: 100%;
-            background: #000;
-            /* Ekranın sağından solundan taşmaması için safe area */
-            padding-left: var(--sal);
-            padding-right: var(--sar);
-        }
-
-        .video-js {
-            width: 100%;
-        }
-
-        .vjs-default-skin .vjs-play-progress,
-        .vjs-default-skin .vjs-volume-level {
-            background-color: var(--primary) !important;
-        }
-
-        /* BİLGİ ÇUBUĞU (Videonun hemen altı) */
-        .info-bar {
-            padding: 16px 20px;
-            background: var(--bg-card);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-left: calc(var(--sal) + 20px);
-            padding-right: calc(var(--sar) + 20px);
-        }
-
-        .now-playing-label {
-            font-size: 12px;
-            color: var(--text-dim);
-            text-transform: uppercase;
+        .ch-info { flex: 1; min-width: 0; }
+        .ch-name {
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 4px;
+            color: var(--t1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .channel-item.active .ch-name { color: var(--green); }
+        .ch-sub {
+            font-size: 11px;
+            color: var(--t3);
+            margin-top: 2px;
         }
 
-        #nowPlayingText {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--primary);
+        .ch-indicator {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.15s;
+            flex-shrink: 0;
+        }
+        .ch-indicator svg { fill: var(--t2); width: 10px; height: 10px; margin-left: 2px; }
+        .channel-item:hover .ch-indicator { opacity: 1; }
+        .channel-item.active .ch-indicator {
+            opacity: 1;
+            background: var(--green);
+        }
+        .channel-item.active .ch-indicator svg { fill: #fff; }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--t3);
+            font-size: 13px;
+            display: none;
         }
 
-        /* KANAL LİSTESİ */
-        .channels-wrapper {
+        /* =====================================================
+           MAIN CONTENT
+           ===================================================== */
+        .main {
             flex: 1;
-            padding: 16px 20px;
-            padding-bottom: calc(var(--sab) + 20px); /* Alttaki iPhone çubuğu için boşluk */
-            padding-left: calc(var(--sal) + 20px);
-            padding-right: calc(var(--sar) + 20px);
-        }
-
-        .channels-wrapper h3 {
-            font-size: 14px;
-            color: var(--text-dim);
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .channel-list {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Kanallar arası boşluk */
+            background: var(--bg-void);
+            overflow: hidden;
+            position: relative;
         }
 
-        .channel-btn {
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.05);
-            color: var(--text-main);
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 15px;
+        /* =====================================================
+           VIDEO AREA
+           ===================================================== */
+        .video-wrap {
+            flex: 1;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        video#player {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .loading-overlay.visible { opacity: 1; pointer-events: auto; }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            font-size: 14px;
+            color: var(--t2);
+            font-weight: 500;
+        }
+
+        /* Error Overlay */
+        .error-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .error-overlay.visible { opacity: 1; pointer-events: auto; }
+        .error-icon { font-size: 48px; }
+        .error-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--t1);
+        }
+        .error-msg { font-size: 13px; color: var(--t2); text-align: center; max-width: 280px; }
+        .retry-btn {
+            margin-top: 8px;
+            padding: 10px 24px;
+            background: var(--green);
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .retry-btn:hover { opacity: 0.85; }
+
+        /* Empty / welcome state */
+        .empty-state {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 5;
+        }
+        .empty-state svg { opacity: 0.15; }
+        .empty-state h2 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--t2);
+        }
+        .empty-state p { font-size: 14px; color: var(--t3); }
+
+        /* iOS tap-to-unmute overlay */
+        .ios-unmute {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--border);
+            color: var(--t1);
+            font-size: 13px;
             font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 20px;
+            z-index: 20;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            display: none;
+        }
+
+        /* =====================================================
+           INFO BAR
+           ===================================================== */
+        .info-bar {
+            padding: 16px 28px;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            gap: 16px;
+            flex-shrink: 0;
         }
 
-        .channel-btn:active {
-            transform: scale(0.97);
-            background: rgba(255,255,255,0.1);
+        .info-left { min-width: 0; }
+        .info-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: var(--t1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .info-subtitle {
+            font-size: 12px;
+            color: var(--t2);
+            margin-top: 3px;
+            font-weight: 500;
         }
 
-        .channel-btn.active {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--text-main);
+        .info-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+        .quality-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--green-glow);
+            border: 1px solid var(--green-dim);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--green);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
-        .channel-btn.active .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary);
+        /* =====================================================
+           TOAST NOTIFICATIONS
+           ===================================================== */
+        #toast-root {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
         }
 
-        /* PC İÇİN UFAK BİR DOKUNUŞ (Geniş ekranlarda çok yayılmasın diye) */
-        @media (min-width: 768px) {
-            body {
-                align-items: center;
-                background-color: #000;
-            }
-            .app-container {
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            color: var(--t1);
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            animation: slideIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            max-width: 300px;
+        }
+        .toast.error { border-left-color: var(--red); }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { transform: translateX(120%); opacity: 0; }
+        }
+
+        /* =====================================================
+           MOBILE BOTTOM SHEET (hamburger toggle)
+           ===================================================== */
+        .mob-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .mob-toggle svg { fill: var(--t2); width: 18px; height: 18px; }
+
+        /* =====================================================
+           SKELETON LOADER
+           ===================================================== */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+        }
+        .skel-logo { width:36px; height:36px; border-radius:8px; }
+        .skel-lines { flex:1; display:flex; flex-direction:column; gap:6px; }
+        .skel-line1 { height:12px; width:70%; }
+        .skel-line2 { height:10px; width:40%; }
+
+        /* =====================================================
+           MOBILE RESPONSIVE
+           ===================================================== */
+        @media (max-width: 860px) {
+            .body { flex-direction: column; }
+
+            .sidebar {
                 width: 100%;
-                max-width: 480px; /* Mobil ekran boyutuna sabitliyoruz */
-                background-color: var(--bg-dark);
-                min-height: 100vh;
-                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+                min-width: 0;
+                height: 42vh;
+                border-right: none;
+                border-top: 1px solid var(--border);
+                order: 2;
             }
+
+            .main {
+                height: 58vh;
+                flex: none;
+                order: 1;
+            }
+
+            .info-bar {
+                padding: 10px 16px;
+            }
+            .info-title { font-size: 16px; }
+            .info-subtitle { display: none; }
+
+            header { padding: 0 16px; }
+            .channel-count { display: none; }
+
+            .mob-toggle { display: flex; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { height: 44vh; }
+            .main { height: 56vh; }
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div id="app">
+
+    <!-- HEADER -->
     <header>
-        <div class="brand">Cio<span>TV</span></div>
-        <div class="live-badge">CANLI</div>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 6.5c0-.83-.67-1.5-1.5-1.5H17V3.5C17 2.67 16.33 2 15.5 2h-7C7.67 2 7 2.67 7 3.5V5H4.5C3.67 5 3 5.67 3 6.5v11c0 .83.67 1.5 1.5 1.5H9v1.5c0 .83.67 1.5 1.5 1.5h5c.83 0 1.5-.67 1.5-1.5V19h3.5c.83 0 1.5-.67 1.5-1.5v-11zm-9 8.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 8 12 8s3.5 1.57 3.5 3.5S13.93 15 12 15z"/></svg>
+            </div>
+            Cio<em>TV</em>
+        </div>
+
+        <div class="header-right">
+            <span class="channel-count" id="chCount"></span>
+            <div class="live-badge">
+                <div class="live-dot"></div>
+                <span>Canlı</span>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <div class="video-container">
-            <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered vjs-fluid" controls preload="auto" autoplay muted playsinline>
-            </video>
-        </div>
+    <!-- BODY -->
+    <div class="body">
 
-        <div class="info-bar">
-            <div class="now-playing-label">Şu An Yayında</div>
-            <div id="nowPlayingText">Yükleniyor...</div>
-        </div>
-
-        <div class="channels-wrapper">
-            <h3>KANALLAR</h3>
-            <div class="channel-list" id="channelList">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-label">Kanallar</div>
+                <div class="search-wrap">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="search" id="searchInput" placeholder="Kanal ara..." autocomplete="off" spellcheck="false">
                 </div>
-        </div>
-    </main>
+            </div>
+
+            <div class="channel-list" id="channelList">
+                <!-- Skeleton placeholders -->
+                <div class="skel-item" id="skelContainer">
+                    <div class="skeleton skel-logo"></div>
+                    <div class="skel-lines">
+                        <div class="skeleton skel-line1"></div>
+                        <div class="skeleton skel-line2"></div>
+                    </div>
+                </div>
+                <div class="skel-item">
+                    <div class="skeleton skel-logo"></div>
+                    <div class="skel-lines">
+                        <div class="skeleton skel-line1" style="width:55%"></div>
+                        <div class="skeleton skel-line2" style="width:30%"></div>
+                    </div>
+                </div>
+                <div class="skel-item">
+                    <div class="skeleton skel-logo"></div>
+                    <div class="skel-lines">
+                        <div class="skeleton skel-line1" style="width:80%"></div>
+                        <div class="skeleton skel-line2"></div>
+                    </div>
+                </div>
+                <div class="skel-item">
+                    <div class="skeleton skel-logo"></div>
+                    <div class="skel-lines">
+                        <div class="skeleton skel-line1" style="width:60%"></div>
+                        <div class="skeleton skel-line2" style="width:35%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="no-results" id="noResults">Kanal bulunamadı</div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+            <div class="video-wrap" id="videoWrap">
+
+                <!-- Welcome/empty state -->
+                <div class="empty-state" id="emptyState">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="white"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+                    <h2>Kanal Seçin</h2>
+                    <p>Sol panelden bir kanal seçerek başlayın</p>
+                </div>
+
+                <video
+                    id="player"
+                    playsinline
+                    webkit-playsinline
+                    x5-playsinline
+                    x5-video-player-type="h5"
+                    muted
+                    controls
+                    preload="none"
+                ></video>
+
+                <!-- Loading -->
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                    <div class="loading-text" id="loadingText">Bağlanılıyor...</div>
+                </div>
+
+                <!-- Error -->
+                <div class="error-overlay" id="errorOverlay">
+                    <div class="error-icon">📡</div>
+                    <div class="error-title">Yayın Alınamadı</div>
+                    <div class="error-msg" id="errorMsg">Bu kanal şu an erişilebilir değil. Farklı bir kanal deneyin.</div>
+                    <button class="retry-btn" id="retryBtn">Tekrar Dene</button>
+                </div>
+
+                <!-- iOS unmute hint -->
+                <div class="ios-unmute" id="iosUnmute">🔇 Sesi Açmak İçin Dokun</div>
+
+            </div>
+
+            <!-- Info Bar -->
+            <div class="info-bar">
+                <div class="info-left">
+                    <div class="info-title" id="infoTitle">CioTV — Yayın Seçin</div>
+                    <div class="info-subtitle">Yüksek Kalite • HLS Akışı • Çoklu Platform</div>
+                </div>
+                <div class="info-right">
+                    <div class="quality-badge" id="qualityBadge" style="display:none">HD</div>
+                </div>
+            </div>
+        </main>
+
+    </div>
 </div>
 
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<!-- Toast Container -->
+<div id="toast-root"></div>
+
+<!-- ============================================================
+     hls.js — tüm tarayıcılarda HLS desteği için
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
 
 <script>
-    const jsonUrl = "https://raw.githubusercontent.com/akropavic/kacakci/main/stream_links.json";
-    const channelList = document.getElementById('channelList');
-    const nowPlayingText = document.getElementById('nowPlayingText');
-    
-    // Video.js Oynatıcıyı Başlat
-    const player = videojs('my-video', {
-        liveui: true,
-        autoplay: 'muted',
-        controls: true
+/* ================================================================
+   CioTV — Cross-Platform IPTV Engine
+   Desteklenen platformlar:
+     • iOS Safari (native HLS)
+     • Android Chrome/Firefox (hls.js)
+     • macOS Safari (native HLS)
+     • Desktop Chrome/Firefox/Edge (hls.js)
+     • Samsung Internet (hls.js)
+   ================================================================ */
+
+const JSON_URL = "https://raw.githubusercontent.com/akropavic/kacakci/main/stream_links.json";
+
+/* ── ELEMENT REFS ─────────────────────────────────────────────── */
+const videoEl     = document.getElementById('player');
+const chList      = document.getElementById('channelList');
+const searchInput = document.getElementById('searchInput');
+const infoTitle   = document.getElementById('infoTitle');
+const chCount     = document.getElementById('chCount');
+const loadingOvl  = document.getElementById('loadingOverlay');
+const loadingTxt  = document.getElementById('loadingText');
+const errorOvl    = document.getElementById('errorOverlay');
+const errorMsg    = document.getElementById('errorMsg');
+const retryBtn    = document.getElementById('retryBtn');
+const emptyState  = document.getElementById('emptyState');
+const qualBadge   = document.getElementById('qualityBadge');
+const iosUnmute   = document.getElementById('iosUnmute');
+const toastRoot   = document.getElementById('toast-root');
+
+/* ── STATE ────────────────────────────────────────────────────── */
+let hlsInstance     = null;
+let channels        = [];           // { key, name, url, abbr }
+let activeIdx       = -1;
+let currentUrl      = null;
+let retryCount      = 0;
+const MAX_RETRIES   = 3;
+let isIOS           = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let hasNativeHLS    = videoEl.canPlayType('application/vnd.apple.mpegurl') !== '';
+
+/* ── CHANNEL NAME FORMATTER ────────────────────────────────────── */
+function formatName(key) {
+    const map = {
+        'bein1'  : 'beIN Sports 1',
+        'bein2'  : 'beIN Sports 2',
+        'bein3'  : 'beIN Sports 3',
+        'bein4'  : 'beIN Sports 4',
+        'bein5'  : 'beIN Sports 5',
+        'bein6'  : 'beIN Sports 6',
+        'bein7'  : 'beIN Sports 7',
+        'bein8'  : 'beIN Sports 8',
+        'bein9'  : 'beIN Sports 9',
+        'beinmax': 'beIN Sports MAX',
+        'max1'   : 'MAX 1',
+        'max2'   : 'MAX 2',
+        'max3'   : 'MAX 3',
+        'max4'   : 'MAX 4',
+        'max5'   : 'MAX 5',
+        'exxen'  : 'EXXEN',
+        'gain'   : 'Gain',
+        'blutv'  : 'BluTV',
+    };
+    if (map[key]) return map[key];
+
+    return key
+        .replace(/bein(\d+)/i, 'beIN Sports $1')
+        .replace(/max(\d+)/i, 'MAX $1')
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .trim()
+        .toUpperCase();
+}
+
+function getAbbr(name) {
+    const words = name.split(' ').filter(Boolean);
+    if (words.length === 1) return name.substring(0, 3).toUpperCase();
+    return (words[0][0] + (words[1][0] || '')).toUpperCase();
+}
+
+/* ── SKELETON REMOVE ───────────────────────────────────────────── */
+function clearSkeletons() {
+    chList.querySelectorAll('.skel-item').forEach(el => el.remove());
+}
+
+/* ── BUILD CHANNEL LIST ───────────────────────────────────────── */
+function buildChannelList(list) {
+    clearSkeletons();
+    chList.innerHTML = '';
+
+    list.forEach((ch, i) => {
+        const el = document.createElement('div');
+        el.className = 'channel-item';
+        el.dataset.idx = i;
+        el.innerHTML = `
+            <div class="ch-num">${i + 1}</div>
+            <div class="ch-logo">${ch.abbr}</div>
+            <div class="ch-info">
+                <div class="ch-name">${ch.name}</div>
+                <div class="ch-sub">HLS • Canlı</div>
+            </div>
+            <div class="ch-indicator">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+        `;
+        el.addEventListener('click', () => switchChannel(i));
+        el.addEventListener('touchstart', () => {}, { passive: true }); // iOS 300ms tap fix
+        chList.appendChild(el);
     });
+}
 
-    // Kanal ismini temiz gösterme
-    function formatChannelName(name) {
-        return name.replace('bein', 'BeIN Sports ')
-                   .replace('max', 'Max ')
-                   .toUpperCase();
+function renderFiltered(query) {
+    const items = chList.querySelectorAll('.channel-item');
+    let visible = 0;
+    items.forEach(el => {
+        const idx = parseInt(el.dataset.idx);
+        const ch  = channels[idx];
+        const match = !query || ch.name.toLowerCase().includes(query.toLowerCase());
+        el.style.display = match ? 'flex' : 'none';
+        if (match) visible++;
+    });
+    document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+}
+
+/* ── SET ACTIVE CHANNEL ───────────────────────────────────────── */
+function setActive(idx) {
+    chList.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
+    const target = chList.querySelector(`.channel-item[data-idx="${idx}"]`);
+    if (target) {
+        target.classList.add('active');
+        target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
+    activeIdx = idx;
+}
 
-    // Veri çekme mantığı
-    fetch(jsonUrl)
-        .then(response => response.json())
-        .then(data => {
-            let isFirstChannel = true;
+/* ── SWITCH CHANNEL ───────────────────────────────────────────── */
+function switchChannel(idx) {
+    if (idx === activeIdx) return;
 
-            for (const [channelKey, links] of Object.entries(data)) {
-                if (links.length > 0) {
-                    const streamUrl = links[0];
-                    const displayName = formatChannelName(channelKey);
-                    
-                    const btn = document.createElement('div');
-                    btn.className = 'channel-btn';
-                    
-                    // İçine isim ve aktiflik noktası koyuyoruz
-                    btn.innerHTML = `
-                        <span>${displayName}</span>
-                        <div class="status-dot"></div>
-                    `;
-                    
-                    btn.onclick = () => {
-                        // Diğer butonlardan active class'ını temizle
-                        document.querySelectorAll('.channel-btn').forEach(b => {
-                            b.classList.remove('active');
-                            b.querySelector('.status-dot').style.display = 'none';
-                        });
-                        
-                        // Tıklananı aktif yap
-                        btn.classList.add('active');
-                        btn.querySelector('.status-dot').style.display = 'block';
-                        
-                        nowPlayingText.innerText = displayName;
-                        playStream(streamUrl);
-                        
-                        // Tıklayınca yukarı kaydır
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    };
+    const ch = channels[idx];
+    if (!ch) return;
 
-                    // Başlangıçta noktaları gizle
-                    btn.querySelector('.status-dot').style.display = 'none';
-                    
-                    channelList.appendChild(btn);
+    setActive(idx);
+    infoTitle.textContent = ch.name;
+    currentUrl = ch.url;
+    retryCount = 0;
 
-                    // İlk kanalı aç
-                    if (isFirstChannel) {
-                        btn.classList.add('active');
-                        btn.querySelector('.status-dot').style.display = 'block';
-                        nowPlayingText.innerText = displayName;
-                        playStream(streamUrl);
-                        isFirstChannel = false;
-                    }
+    emptyState.style.display = 'none';
+    qualBadge.style.display  = 'none';
+
+    showToast(`📺 ${ch.name}`);
+    playStream(ch.url);
+}
+
+/* ── HLS PLAYBACK ENGINE ──────────────────────────────────────── */
+function playStream(url) {
+    stopStream();
+
+    showLoading('Bağlanılıyor...');
+
+    if (Hls.isSupported()) {
+        // hls.js — Chrome, Firefox, Edge, Android, Samsung Internet
+        hlsInstance = new Hls({
+            enableWorker:      true,
+            lowLatencyMode:    false,
+            backBufferLength:  30,
+            maxBufferLength:   30,
+            maxMaxBufferLength:60,
+            maxBufferSize:     60  * 1000 * 1000,
+            maxBufferHole:     0.5,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 10,
+            fragLoadingTimeOut: 20000,
+            manifestLoadingTimeOut: 15000,
+            xhrSetup: function(xhr) {
+                xhr.withCredentials = false;
+            }
+        });
+
+        hlsInstance.loadSource(url);
+        hlsInstance.attachMedia(videoEl);
+
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+            hideLoading();
+            showQualityBadge(data);
+            attemptPlay();
+        });
+
+        hlsInstance.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
+            const levels = hlsInstance.levels;
+            if (levels && levels[data.level]) {
+                const lv = levels[data.level];
+                const res = lv.height ? `${lv.height}p` : 'HD';
+                qualBadge.textContent = res;
+                qualBadge.style.display = 'block';
+            }
+        });
+
+        hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+            console.warn('[HLS] Error:', data.type, data.details, data.fatal);
+
+            if (data.fatal) {
+                switch(data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        if (retryCount < MAX_RETRIES) {
+                            retryCount++;
+                            showLoading(`Yeniden bağlanılıyor... (${retryCount}/${MAX_RETRIES})`);
+                            setTimeout(() => hlsInstance && hlsInstance.startLoad(), 2000);
+                        } else {
+                            showError('Ağ hatası. Yayın sunucusuna ulaşılamıyor.');
+                        }
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        if (retryCount < MAX_RETRIES) {
+                            retryCount++;
+                            showLoading('Medya hatası, kurtarılıyor...');
+                            hlsInstance.recoverMediaError();
+                        } else {
+                            showError('Video oynatılamadı. Farklı bir kanal deneyin.');
+                        }
+                        break;
+                    default:
+                        showError('Bilinmeyen hata. Farklı bir kanal deneyin.');
                 }
             }
-        })
-        .catch(error => {
-            console.error("Veri hatası:", error);
-            nowPlayingText.innerText = "Yayın listesi çekilemedi!";
-            nowPlayingText.style.color = "#ef4444";
         });
 
-    function playStream(url) {
-        player.src({
-            src: url,
-            type: 'application/x-mpegURL'
-        });
-        
-        player.ready(function() {
-            player.play().catch(e => console.log("Otomatik oynatma bekliyor..."));
+    } else if (hasNativeHLS) {
+        // Safari (macOS & iOS) — native HLS support
+        videoEl.src = url;
+        videoEl.load();
+
+        videoEl.addEventListener('loadedmetadata', onNativeLoaded, { once: true });
+        videoEl.addEventListener('error', onNativeError, { once: true });
+
+        // iOS özel: önce mute ile başlat
+        if (isIOS) {
+            videoEl.muted = true;
+            showIosUnmuteHint();
+        }
+
+    } else {
+        showError('Bu tarayıcı HLS formatını desteklemiyor. Chrome, Firefox veya Safari kullanın.');
+    }
+}
+
+function onNativeLoaded() {
+    hideLoading();
+    qualBadge.textContent = 'HD';
+    qualBadge.style.display = 'block';
+    attemptPlay();
+}
+
+function onNativeError() {
+    showError('Yayın yüklenemedi. Sunucu erişilemez olabilir.');
+}
+
+function stopStream() {
+    videoEl.removeEventListener('loadedmetadata', onNativeLoaded);
+    videoEl.removeEventListener('error', onNativeError);
+
+    if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+    }
+
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.load();
+
+    hideError();
+}
+
+/* ── PLAY WITH AUTOPLAY POLICY HANDLING ─────────────────────── */
+function attemptPlay() {
+    const promise = videoEl.play();
+    if (promise !== undefined) {
+        promise.catch(err => {
+            console.log('[Autoplay] Blocked:', err.name);
+            if (err.name === 'NotAllowedError') {
+                // Show unmute/play hint
+                showIosUnmuteHint();
+            }
         });
     }
+}
+
+/* ── QUALITY BADGE ──────────────────────────────────────────── */
+function showQualityBadge(data) {
+    const levels = data.levels || [];
+    if (levels.length > 0) {
+        const best = levels[levels.length - 1];
+        const res = best.height ? `${best.height}p` : 'HD';
+        qualBadge.textContent = res;
+    } else {
+        qualBadge.textContent = 'HD';
+    }
+    qualBadge.style.display = 'block';
+}
+
+/* ── iOS UNMUTE HINT ─────────────────────────────────────────── */
+function showIosUnmuteHint() {
+    iosUnmute.style.display = 'block';
+}
+
+iosUnmute.addEventListener('click', () => {
+    videoEl.muted = false;
+    iosUnmute.style.display = 'none';
+    if (videoEl.paused) videoEl.play().catch(() => {});
+});
+
+/* ── VIDEO EVENT LISTENERS ───────────────────────────────────── */
+videoEl.addEventListener('waiting', () => {
+    if (activeIdx >= 0) showLoading('Arabellek dolduruluyor...');
+});
+
+videoEl.addEventListener('playing', () => {
+    hideLoading();
+    hideError();
+});
+
+videoEl.addEventListener('stalled', () => {
+    if (activeIdx >= 0) showLoading('Bağlantı yavaş...');
+});
+
+/* ── UI HELPERS ──────────────────────────────────────────────── */
+function showLoading(msg) {
+    loadingTxt.textContent = msg || 'Yükleniyor...';
+    loadingOvl.classList.add('visible');
+    errorOvl.classList.remove('visible');
+}
+function hideLoading() {
+    loadingOvl.classList.remove('visible');
+}
+function showError(msg) {
+    hideLoading();
+    errorMsg.textContent = msg;
+    errorOvl.classList.add('visible');
+    qualBadge.style.display = 'none';
+}
+function hideError() {
+    errorOvl.classList.remove('visible');
+}
+
+retryBtn.addEventListener('click', () => {
+    if (currentUrl && activeIdx >= 0) {
+        retryCount = 0;
+        hideError();
+        playStream(currentUrl);
+    }
+});
+
+/* ── TOAST ───────────────────────────────────────────────────── */
+function showToast(msg, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (isError ? ' error' : '');
+    toast.textContent = msg;
+    toastRoot.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.25s ease forwards';
+        setTimeout(() => toast.remove(), 250);
+    }, 3000);
+}
+
+/* ── SEARCH ──────────────────────────────────────────────────── */
+searchInput.addEventListener('input', () => {
+    renderFiltered(searchInput.value.trim());
+});
+searchInput.addEventListener('search', () => {   // clear button (x)
+    renderFiltered('');
+});
+
+/* ── KEYBOARD NAV ─────────────────────────────────────────────── */
+document.addEventListener('keydown', (e) => {
+    if (e.target === searchInput) return;
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = activeIdx + 1;
+        if (next < channels.length) switchChannel(next);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = activeIdx - 1;
+        if (prev >= 0) switchChannel(prev);
+    }
+});
+
+/* ── DATA FETCH ──────────────────────────────────────────────── */
+async function loadChannels() {
+    try {
+        const res  = await fetch(JSON_URL + '?_=' + Date.now()); // cache bust
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        channels = [];
+        for (const [key, links] of Object.entries(data)) {
+            if (Array.isArray(links) && links.length > 0) {
+                const name = formatName(key);
+                channels.push({
+                    key,
+                    name,
+                    url:  links[0],
+                    abbr: getAbbr(name)
+                });
+            }
+        }
+
+        if (channels.length === 0) {
+            clearSkeletons();
+            showToast('Kanal listesi boş geldi.', true);
+            return;
+        }
+
+        buildChannelList(channels);
+        chCount.textContent = `${channels.length} kanal`;
+
+        // İlk kanalı otomatik başlat
+        switchChannel(0);
+
+    } catch (err) {
+        console.error('[CioTV] Fetch error:', err);
+        clearSkeletons();
+        chList.innerHTML = `<div style="text-align:center;padding:30px;color:var(--t3);font-size:13px;">Kanal listesi alınamadı.<br><small>${err.message}</small></div>`;
+        infoTitle.textContent = 'Bağlantı Hatası';
+        showToast('Kanal listesi yüklenemedi!', true);
+    }
+}
+
+/* ── BOOT ────────────────────────────────────────────────────── */
+loadChannels();
+
+/* ── Platform Detection Log ─────────────────────────────────── */
+console.log(`[CioTV] Platform: ${isIOS ? 'iOS/iPadOS' : 'Other'} | Native HLS: ${hasNativeHLS} | hls.js: ${Hls.isSupported()}`);
 </script>
 
 </body>
