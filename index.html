@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canlı Yayın</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0f1115;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+
+    .player {
+      background: black;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    video {
+      width: 100%;
+      display: block;
+      background: black;
+      aspect-ratio: 16 / 9;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: red;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Canlı Yayın</h1>
+
+    <div class="player">
+      <video id="video" controls autoplay playsinline></video>
+    </div>
+
+    <div class="status">
+      <span class="live-dot"></span>
+      Canlı yayın
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+
+    const streamUrl =
+      "http://212.180.120.199:8888/yayin/index.m3u8";
+
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = streamUrl;
+    }
+    else if (Hls.isSupported()) {
+      const hls = new Hls();
+
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play().catch(() => {});
+      });
+
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        console.log("HLS hata:", data);
+      });
+    }
+    else {
+      alert("Tarayıcınız HLS yayını desteklemiyor.");
+    }
+  </script>
+
+</body>
+</html>
